@@ -138,6 +138,10 @@ After the welcome/resume banner, ALWAYS display the complete TezAtlas toolbox. T
 ║  /citation-check Atıf doğrulama (iddia vs PDF)              ║
 ║  /generate-citations BibTeX/RIS üretici                      ║
 ║                                                              ║
+║  🏥 KLİNİK YAZIM (STROBE/IMRAD)                              ║
+║  /clinical-article      Klinik makale workflow (4 aşama)     ║
+║  /peer-review-clinical  Hakem incelemesi (Reviewer 2 modu)   ║
+║                                                              ║
 ║  ⚙️  DİĞER                                                   ║
 ║  /career-profile Kariyer profili                             ║
 ║  /install-plugin Plugin yöneticisi                           ║
@@ -208,6 +212,15 @@ After all answers are received:
 ## Step 6 — Route to Phase 0 and Begin
 
 Based on the document type selected, read the appropriate Phase 0 node from `skills/phases/`.
+
+**Special routing for Clinical Article (type I):**
+If the user selected I (Clinical Article / Klinik Makale):
+1. Read `agents/prompts/clinical_writer.md` — load as active writing protocol
+2. Read `skills/phases/clinical-article/phase-0-study-design.md` — begin Phase 0
+3. Do NOT run `scripts/new_project.py` with standard article type — use `--type clinical-article`
+4. Inform the user: "Klinik Makale modu aktif. STROBE/IMRAD protokolü, banned words denetimi ve hakem incelemesi (Reviewer 2 modu) bu oturum boyunca aktif kalacak."
+5. At phase gate transitions, offer `/peer-review-clinical` instead of `/ai-review`
+6. At style check (Step 9, Phase 6), run style linter — it now includes banned word detection
 
 Open Phase 0 work in the user's chosen language.
 State clearly what Phase 0 will produce (the deliverables).

@@ -74,9 +74,11 @@ E) Research Report                   (5 phases)
 F) Book Chapter                      (5 phases)
 G) Grant Proposal                    (6 phases)
 H) Research Proposal / Prospectus    (5 phases)
+I) Clinical Article — STROBE/IMRAD   (4 phases)
+   [Emergency medicine, observational studies, RCTs — STROBE/CONSORT/STARD protocols]
 ```
 
-Type the letter (A–H) or the full name.
+Type the letter (A–I) or the full name.
 
 ---
 
@@ -251,6 +253,7 @@ Once you answer all seven questions, TezAtlas will:
 | F — Book Chapter | `skills/phases/book-chapter/phase-0-alignment.md` |
 | G — Grant Proposal | `skills/phases/grant-proposal/phase-0-brief.md` |
 | H — Research Proposal | `skills/phases/research-proposal/phase-0-prospectus.md` |
+| I — Clinical Article | `skills/phases/clinical-article/phase-0-study-design.md` + load `agents/prompts/clinical_writer.md` |
 
 4. Set context mode (Student / Researcher) and writing mode (Copilot default for all)
 5. Load the Iron Rules + Anti-Hallucination Protocol as background context (always active)
@@ -283,9 +286,11 @@ E) Araştırma Raporu                  (5 aşama)
 F) Kitap Bölümü                      (5 aşama)
 G) Hibe Teklifi / Grant Proposal     (6 aşama)
 H) Araştırma Önerisi / Prospektüs    (5 aşama)
+I) Klinik Makale — STROBE/IMRAD      (4 aşama)
+   [Acil tıp, gözlemsel çalışmalar, RCT — STROBE/CONSORT/STARD protokolleri]
 ```
 
-Harf (A–H) veya tam adı yazın.
+Harf (A–I) veya tam adı yazın.
 
 ---
 
@@ -431,7 +436,19 @@ Yedi soruyu yanıtladıktan sonra TezAtlas:
 
 1. Seçimlerinizi aktif mod dahil bir banner ile onaylar
 2. Kullanıcı tipini belirler: Öğrenci Modu veya Araştırmacı Modu (`operating-modes.md`)
-3. Sizi doğru Aşama 0 düğümüne yönlendirir
+3. Sizi doğru Aşama 0 düğümüne yönlendirir:
+
+| Seçim | Aşama 0 Düğümü |
+|-------|----------------|
+| A — Tez | `skills/phases/thesis/phase-0-identity.md` |
+| B — Dergi Makalesi | `skills/phases/article/phase-0-claim.md` |
+| C — Konferans | `skills/phases/conference/phase-0-abstract.md` |
+| D — Lit/Sistematik Derleme | `skills/phases/lit-review/phase-0-protocol.md` |
+| E — Araştırma Raporu | `skills/phases/report/phase-0-brief.md` |
+| F — Kitap Bölümü | `skills/phases/book-chapter/phase-0-alignment.md` |
+| G — Grant Teklifi | `skills/phases/grant-proposal/phase-0-brief.md` |
+| H — Araştırma Önerisi | `skills/phases/research-proposal/phase-0-prospectus.md` |
+| I — Klinik Makale | `skills/phases/clinical-article/phase-0-study-design.md` + `agents/prompts/clinical_writer.md` yükle |
 4. Demir Kuralları + Anti-Halüsinasyon Protokolü'nü arka planda yükler (her zaman aktif)
 5. Seçtiğiniz dilde Aşama 0'a başlar
 6. İlk oturum sonunda STATUS.md ve DASHBOARD.md oluşturur (output_format ve kelime hedefleri dahil)
