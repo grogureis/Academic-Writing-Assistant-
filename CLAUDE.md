@@ -128,3 +128,21 @@ is Claude Code-specific.
 - Research Proposal / Prospectus → skills/phases/research-proposal/
 - Poster → skills/phases/poster/
 - Technical Report → skills/phases/technical-report/
+- **Clinical Article (STROBE/IMRAD)** → skills/phases/clinical-article/ — Use `/clinical-article`
+
+## Clinical Writing Variant
+
+For emergency medicine and clinical research manuscripts (retrospective cohort, case-control, cross-sectional, RCT):
+
+- `/clinical-article` — Full STROBE-IMRAD manuscript workflow (4 phases)
+- `/peer-review-clinical` — Peer review against ICMJE/EQUATOR standards (Reviewer 2 archetype)
+
+Agent prompts:
+- `agents/prompts/clinical_writer.md` — Clinical Manuscript Writing Assistant v2.0
+- `agents/prompts/peer_reviewer.md` — Peer Review Assistant v2.1
+
+### Style Linter — Banned Words
+`tools/style_linter.py` now detects banned LLM buzzwords in addition to passive voice, hedging, and overclaiming. Run:
+```
+python3 tools/style_linter.py manuscript.md
+```

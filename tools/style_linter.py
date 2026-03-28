@@ -69,6 +69,53 @@ EN_OVERCLAIM_PATTERNS = [
     (r'\bproves? (that|the)\b', 'provides evidence that'),
 ]
 
+# ── Banned Words (LLM buzzwords and AI-generated filler — never use in academic writing)
+EN_BANNED_WORDS = [
+    # Single words
+    'accordingly', 'adept', 'agile', 'amplify', 'arduous', 'augment', 'bandwidth',
+    'burgeoning', 'captivate', 'captivating', 'catapult', 'cognizant', 'commendable',
+    'compelling', 'conceptualize', 'consequently', 'considerable', 'convey',
+    'cornerstone', 'craft', 'crafting', 'crucial', 'delve', 'delved', 'delving',
+    'deliverables', 'despair', 'dynamic', 'efficiency', 'elevate', 'embark',
+    'employ', 'empower', 'enable', 'engage', 'engaging', 'enlightening', 'enriches',
+    'entrusting', 'essentially', 'esteemed', 'excels', 'exciting', 'exemplary',
+    'facilitate', 'fantastic', 'flourishing', 'formidable', 'foster', 'fostering',
+    'fundamental', 'fundamentally', 'glean', 'granular', 'groundbreaking', 'harness',
+    'hence', 'herein', 'heretofore', 'holistic', 'hone', 'imaginative', 'impactful',
+    'invaluable', 'iteration', 'juggling', 'leverage', 'linchpin', 'manifold',
+    'marvelous', 'maximize', 'milestone', 'multifaceted', 'nail', 'navigate',
+    'nugget', 'optimize', 'paramount', 'pivotal', 'plethora', 'profound', 'promote',
+    'remarkable', 'resonate', 'resonates', 'revolutionize', 'robust', 'scalable',
+    'scrappy', 'seamless', 'skyrocket', 'stellar', 'streamline', 'strive',
+    'substantial', 'supercharge', 'surge', 'synergy', 'tackle', 'tailor', 'tailored',
+    'tapestry', 'thereby', 'therein', 'thereof', 'trailblazer', 'transformative',
+    'turbocharge', 'ultimately', 'uncover', 'undeniable', 'underscores', 'undoubtedly',
+    'unleash', 'unlock', 'unparalleled', 'unveil', 'utilize', 'utmost', 'valuable',
+    'vibrant', 'vital', 'whip', 'whilst',
+    # Common in academic but discouraged per user preference
+    'novel', 'paradigm', 'encompassing', 'pioneering', 'landscape', 'realm',
+]
+
+# Banned multi-word phrases
+EN_BANNED_PHRASES = [
+    'a journey of', 'a multitude of', 'a plethora of', 'a testament to',
+    'actionable insights', 'ai-powered', 'as a result', 'as such', 'best practices',
+    'blockchain-enabled', 'cannot be overstated', 'certainly here are',
+    'change management', 'cloud-based', 'competitive landscape',
+    'continuous improvement', 'cutting edge', 'cutting-edge', 'data-driven',
+    'deep dive', 'digital age', 'digital realm', 'digital transformation',
+    'digital world', 'disruptive innovation', 'dive into', 'domain expertise',
+    'ever-evolving', 'ever wondered', 'fast-paced', 'foray into', 'future-proof',
+    'game changer', 'game-changer', 'going forward', 'golden ticket', 'high-level',
+    'in a world', 'in conclusion', 'in the era of', 'in the world of',
+    "in today's era", "in today's world", 'insights into', 'key takeaways',
+    'mind blowing', 'mission-critical', 'moving forward', 'pain point',
+    'paradigm shift', 'perfect storm', 'powerful tool', 'secret sauce',
+    'secret weapon', 'significantly contributes', 'state-of-the-art',
+    'value proposition', 'value-added', 'welcome to the world', 'well-crafted',
+    'widely recognized', 'with regards to',
+]
+
 # Over-claiming patterns (Turkish)
 TR_OVERCLAIM_PATTERNS = [
     (r'\bkesinlikle kanıtlamaktadır\b', 'kanıt sunmaktadır'),
@@ -98,6 +145,7 @@ class LintReport:
     passive_rate: float
     hedge_chains: int
     overclaim_count: int
+    banned_count: int = 0
     issues: list[LintIssue] = field(default_factory=list)
 
     @property
@@ -106,7 +154,8 @@ class LintReport:
         deductions = (
             min(30, int(max(0, self.passive_rate - 0.25) * 200)) +  # max 30 for passive
             min(20, self.hedge_chains * 5) +                         # max 20 for hedging
-            min(30, self.overclaim_count * 10)                       # max 30 for overclaiming
+            min(30, self.overclaim_count * 10) +                     # max 30 for overclaiming
+            min(20, self.banned_count * 2)                           # max 20 for banned words
         )
         return max(0, 100 - deductions)
 
@@ -160,6 +209,20 @@ def detect_hedge_chains(text: str, lang: str) -> list[tuple[int, str, int]]:
     return results
 
 
+def detect_banned_words(text: str) -> list[tuple[int, str]]:
+    """Returns list of (line_number, matched_word_or_phrase) for banned words/phrases."""
+    results = []
+    for i, line in enumerate(text.splitlines(), 1):
+        line_lower = line.lower()
+        for phrase in EN_BANNED_PHRASES:
+            if phrase in line_lower:
+                results.append((i, phrase))
+        for word in EN_BANNED_WORDS:
+            if re.search(r'\b' + re.escape(word) + r'\b', line_lower):
+                results.append((i, word))
+    return results
+
+
 def detect_overclaims(text: str, lang: str) -> list[tuple[int, str, str]]:
     """Returns list of (line_number, matched_text, suggestion)."""
     patterns = EN_OVERCLAIM_PATTERNS if lang == "en" else TR_OVERCLAIM_PATTERNS
@@ -197,6 +260,7 @@ def lint_file(filepath: Path, lang: str = "en", passive_threshold: float = 0.25)
     passives = detect_passive(text, lang)
     hedge_chains = detect_hedge_chains(text, lang)
     overclaims = detect_overclaims(text, lang)
+    banned = detect_banned_words(text)
     long_sentences = check_sentence_length(text)
 
     passive_rate = len(passives) / max(1, sentence_count)
@@ -233,6 +297,16 @@ def lint_file(filepath: Path, lang: str = "en", passive_threshold: float = 0.25)
             suggestion=f"Öneri: {suggestion}",
         ))
 
+    # Banned words
+    for lineno, matched in banned:
+        issues.append(LintIssue(
+            category="banned_word",
+            severity="error",
+            line=lineno,
+            text=f'Yasaklı kelime/ifade: "{matched}"',
+            suggestion="Bu kelimeyi kaldırın veya akademik alternatifle değiştirin",
+        ))
+
     # Long sentences
     for lineno, wc in long_sentences:
         issues.append(LintIssue(
@@ -251,6 +325,7 @@ def lint_file(filepath: Path, lang: str = "en", passive_threshold: float = 0.25)
         passive_rate=passive_rate,
         hedge_chains=len(hedge_chains),
         overclaim_count=len(overclaims),
+        banned_count=len(banned),
         issues=issues,
     )
 
@@ -265,6 +340,7 @@ def print_report(report: LintReport, verbose: bool = True) -> None:
     print(f"Pasif çatı:      {report.passive_rate:.0%}  {'✅' if report.passive_rate <= 0.25 else '⚠️'}")
     print(f"Çekince zinciri: {report.hedge_chains}     {'✅' if report.hedge_chains == 0 else '⚠️'}")
     print(f"Aşırı iddia:     {report.overclaim_count}     {'✅' if report.overclaim_count == 0 else '❌'}")
+    print(f"Yasaklı kelime:  {report.banned_count}     {'✅' if report.banned_count == 0 else '❌'}")
     print()
 
     if verbose and report.issues:
